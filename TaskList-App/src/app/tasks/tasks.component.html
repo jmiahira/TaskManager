@@ -1,6 +1,62 @@
-<div *ngFor="let task of tasks">
-    Title: {{task.description}}
-    <br/>
-    Description: {{task.description}}
-    <hr>
+<div class="form-inline">
+    <div class="form-group mb-2">
+        <label class="mr-2"></label><input type="text" class="form-control mr-2" placeholder="Search" [(ngModel)]="taskFilter" >
+    </div>
 </div>
+<h3>Filtering by: {{taskFilter}}</h3>
+<table class="table table-striped">
+    <thead class="thead-dark">
+        <tr>
+            <th>#</th>
+            <th>Title</th>
+            <th>Description</th>
+            <th>Creation Date</th>
+            <th>Status</th>
+            <th>Responsible</th>
+            <th>Priority</th>
+            <th>Options</th>
+        </tr>
+    </thead>
+    <tbody *ngIf="tasks && tasks.length">
+        <tr *ngFor="let task of filteredTasks">
+            <td>{{task.id}}</td>
+            <td>{{task.title}}</td>
+            <td>{{task.description}}</td>
+            <td>{{task.creationDate | DateTimeFormatPipe}}</td>
+            <td>{{task.status}}</td>
+            <td>{{task.userId}}</td>
+            <td>{{task.priority}}</td>
+            <td>
+                <div class="btn-group">
+                    <button class="btn btn-sm btn-success" tooltip="Editar" (click)="openModal(template)">
+                        <i class="fa fa-edit"></i>
+                    </button>
+                    <button class="btn btn-sm btn-danger" tooltip="Excluir">
+                        <i class="fa fa-eraser"></i>
+                    </button>
+                </div>
+            </td>
+        </tr>
+    </tbody>
+    <tfoot *ngIf="!tasks.length">
+        <tr>
+            <td colspan="8" class="text-center">
+                <h4>
+                    No task found!
+                </h4>
+            </td>
+        </tr>
+    </tfoot>
+</table>
+
+<ng-template #template>
+    <div class="modal-header">
+        <h4 class="modal-title pull-left">Modal</h4>
+        <button type="button" class="close pull-right" aria-label="Close" (click)="modalRef.hide()">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body">
+        This is a modal
+    </div>
+</ng-template>

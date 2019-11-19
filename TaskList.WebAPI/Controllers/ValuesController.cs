@@ -5,9 +5,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using TaskList.Api.Data;
-using TaskList.Api.DTO;
-using TaskList.Api.Model;
+using TaskList.Domain;
+using TaskList.Repository;
 
 namespace TaskList.Api.Controllers
 {
@@ -15,8 +14,8 @@ namespace TaskList.Api.Controllers
     [ApiController]
     public class ValuesController : ControllerBase
     {
-        public readonly DataContext _context;
-        public ValuesController(DataContext context)
+        public readonly TaskListContext _context;
+        public ValuesController(TaskListContext context)
         {
             _context = context;
 
@@ -42,7 +41,7 @@ namespace TaskList.Api.Controllers
         {
              try
             {
-                var result = await _context.Tasks.FirstOrDefaultAsync(x => x.TasksId == id);
+                var result = await _context.Tasks.FirstOrDefaultAsync(x => x.Id == id);
                 return (Ok(result));
             }
             catch (System.Exception)

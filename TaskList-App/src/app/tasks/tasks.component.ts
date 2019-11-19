@@ -1,5 +1,8 @@
-import { Component, OnInit } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { Component, OnInit, TemplateRef } from '@angular/core';
+import { TasksService } from '../_services/Tasks.service';
+import { Tasks } from '../_models/Tasks';
+import { BsModalService, BsModalRef } from 'ngx-bootstrap';
+
 
 @Component({
   selector: 'app-tasks',
@@ -7,21 +10,45 @@ import { HttpClient } from '@angular/common/http';
   styleUrls: ['./tasks.component.css']
 })
 export class TasksComponent implements OnInit {
+  tasks: Tasks[];
+  filteredTasks: Tasks[];
+  modalRef: BsModalRef;
 
-  tasks: any;
+  _taskFilter: string;
+  constructor(
+      private tasksService: TasksService
+    , private modalService: BsModalService
+  ) { }
 
-  constructor(private http: HttpClient) { }
+  get taskFilter(): string {
+    return this._taskFilter;
+  }
+  set taskFilter(value: string) {
+    this._taskFilter = value;
+    this.filteredTasks = this._taskFilter ? this.filterTasks(this._taskFilter) : this.tasks;
+  }
+
+  openModal(template: TemplateRef<any>) {
+    this.modalRef = this.modalService.show(template);
+  }
 
   ngOnInit() {
     this.getTasks();
   }
 
+  filterTasks(filterBy: string): Tasks[] {
+    filterBy = filterBy.toLocaleLowerCase();
+    return this.tasks.filter(
+      task => task.title.toLocaleLowerCase().indexOf(filterBy) !== -1
+    );
+  }
+
   getTasks() {
-    this.http.get('http://localhost:5000/api/values').subscribe( response => {
-      this.tasks = response;
+    this.tasksService.getAllTasks().subscribe(
+      (_tasks: Tasks[]) => {
+      this.tasks = _tasks;
     }, error => {
       console.log(error);
     });
   }
-
 }
