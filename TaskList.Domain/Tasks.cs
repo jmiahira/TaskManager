@@ -13,6 +13,6 @@ namespace TaskList.Domain
         public int UserId { get; set; }
         public PriorityTaskType Priority { get; set; }
         public DateTime? LastUpdateDateTime { get; set; }
-        public List<TaskRemarks> TaskRemarks { get; }
+        public List<TaskRemarks> TaskRemarks { get; set; }
     }
 }

@@ -94,7 +94,6 @@ namespace TaskList.Repository
                 if (!string.IsNullOrEmpty(filterTasksQuery.TitleDescription))
                     query = query.Where(t => t.Title.Contains(filterTasksQuery.TitleDescription) || t.Description.Contains(filterTasksQuery.TitleDescription));
             }
-
             return await query.ToArrayAsync();
         }
         #endregion

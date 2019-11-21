@@ -1,9 +1,11 @@
 using System;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TaskList.Domain;
 using TaskList.Repository;
+using TaskList.WebAPI.DTO;
 
 namespace TaskList.WebAPI.Controllers
 {
@@ -13,9 +15,12 @@ namespace TaskList.WebAPI.Controllers
     {
         public readonly ITaskListRepository _repository;
 
-        public TasksController(ITaskListRepository repository)
+        private readonly IMapper _mapper;
+
+        public TasksController(ITaskListRepository repository, IMapper mapper)
         {
             _repository = repository;
+            _mapper = mapper;
         }
 
         [HttpGet]
@@ -23,7 +28,8 @@ namespace TaskList.WebAPI.Controllers
         {
             try
             {
-                var results = await _repository.GetAllTasksAsync(1, StatusTaskType.Opened, false);
+                var tasks = await _repository.GetAllTasksAsync(1, StatusTaskType.Opened, false);
+                var results = _mapper.Map<TasksDTO[]>(tasks);
                 return (Ok(results));
             }
             catch (System.Exception)
@@ -67,7 +73,8 @@ namespace TaskList.WebAPI.Controllers
         {
             try
             {
-                var results = await _repository.GetTaskAsyncById(taskId, false);
+                var task = await _repository.GetTaskAsyncById(taskId, true);
+                var results = _mapper.Map<TasksDTO>(task);
                 return (Ok(results));
             }
             catch (System.Exception)
@@ -81,7 +88,8 @@ namespace TaskList.WebAPI.Controllers
         {
             try
             {
-                var results = await _repository.GetAllTasksAsyncByTitle(1, 0, title, false);
+                var tasks = await _repository.GetAllTasksAsyncByTitle(1, 0, title, false);
+                var results = _mapper.Map<TasksDTO[]>(tasks);
                 return (Ok(results));
             }
             catch (System.Exception)
@@ -91,13 +99,14 @@ namespace TaskList.WebAPI.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post(Tasks model)
+        public async Task<IActionResult> Post(TasksDTO model)
         {
             try
             {
-                _repository.Add(model);
+                var task = _mapper.Map<Tasks>(model);
+                _repository.Add(task);
                 if (await(_repository.SaveChangesAsync())){
-                    return Created($"/api/tasks/{model.Id}", model);
+                    return Created($"/api/tasks/{model.Id}", _mapper.Map<TasksDTO>(task));
                 }
             }
             catch (System.Exception)
@@ -108,16 +117,18 @@ namespace TaskList.WebAPI.Controllers
         }
 
         [HttpPut("{taskId}")]
-        public async Task<IActionResult> Put(int taskId, Tasks model)
+        public async Task<IActionResult> Put(int taskId, TasksDTO model)
         {
             try
             {
                 var task = await _repository.GetTaskAsyncById(taskId, false);
                 if (task == null) return NotFound();
 
-                _repository.Update(model);
+                _mapper.Map(model, task);
+
+                _repository.Update(task);
                 if (await(_repository.SaveChangesAsync())){
-                    return Created($"/api/tasks/{model.Id}", model);
+                    return Created($"/api/tasks/{model.Id}", _mapper.Map<TasksDTO>(task));
                 }
             }
             catch (System.Exception)
