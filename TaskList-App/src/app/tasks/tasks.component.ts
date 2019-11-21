@@ -1,39 +1,60 @@
-import { Component, OnInit, TemplateRef } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { TasksService } from '../_services/Tasks.service';
 import { Tasks } from '../_models/Tasks';
-import { BsModalService, BsModalRef } from 'ngx-bootstrap';
+import { BsModalService } from 'ngx-bootstrap';
+import { FormGroup, Validators, FormBuilder } from '@angular/forms';
+import { defineLocale, BsLocaleService, ptBrLocale } from 'ngx-bootstrap';
 
+defineLocale('pt-br', ptBrLocale);
 
 @Component({
   selector: 'app-tasks',
   templateUrl: './tasks.component.html',
   styleUrls: ['./tasks.component.css']
 })
-export class TasksComponent implements OnInit {
-  tasks: Tasks[];
-  filteredTasks: Tasks[];
-  modalRef: BsModalRef;
 
-  _taskFilter: string;
+export class TasksComponent implements OnInit {
+  titulo = 'Task Lists';
+  tasks: Tasks[];
+  task: Tasks;
+  filteredTasks: Tasks[];
+  registerForm: FormGroup;
+  modeNewEdit = 'post';
+  bodyDeleteTask = '';
+
+  _taskFilter = '';
   constructor(
       private tasksService: TasksService
     , private modalService: BsModalService
-  ) { }
+    , private fb: FormBuilder
+    , private localeService: BsLocaleService
+  ) {
+    this.localeService.use('pt-br');
+  }
 
   get taskFilter(): string {
     return this._taskFilter;
   }
   set taskFilter(value: string) {
     this._taskFilter = value;
-    this.filteredTasks = this._taskFilter ? this.filterTasks(this._taskFilter) : this.tasks;
+    this.filteredTasks = this.taskFilter ? this.filterTasks(this.taskFilter) : this.tasks;
   }
 
-  openModal(template: TemplateRef<any>) {
-    this.modalRef = this.modalService.show(template);
+  editTask(task: Tasks, template: any) {
+    this.modeNewEdit = 'put';
+    this.openModal(template);
+    this.task = task;
+    this.registerForm.patchValue(task);
   }
 
-  ngOnInit() {
-    this.getTasks();
+  newTask(template: any) {
+    this.modeNewEdit = 'post';
+    this.openModal(template);
+  }
+
+  openModal(template: any) {
+    this.registerForm.reset();
+    template.show();
   }
 
   filterTasks(filterBy: string): Tasks[] {
@@ -43,12 +64,74 @@ export class TasksComponent implements OnInit {
     );
   }
 
+  ngOnInit() {
+    this.validation();
+    this.getTasks();
+  }
+
+  validation() {
+    this.registerForm = this.fb.group({
+      title: ['', [Validators.required, Validators.minLength(4), Validators.maxLength(50)]],
+      description: ['', Validators.maxLength(150)],
+      userId: ['', Validators.required],
+      creationDate: ['', Validators.required],
+      status: ['', Validators.required],
+      priority: ['', Validators.required],
+      lastUpdateDateTime: ['', Validators.required]
+    });
+  }
+
+  saveChanges(template: any) {
+    if (this.registerForm.valid) {
+      if (this.modeNewEdit === 'post') {
+        this.task = Object.assign({}, this.registerForm.value);
+        this.tasksService.postTask(this.task).subscribe (
+          (newTask: Tasks) => {
+            console.log(newTask);
+            template.hide();
+            this.getTasks();
+          }, error => {
+            console.log(error);
+          }
+        );
+      } else {
+        this.task = Object.assign({id: this.task.id}, this.registerForm.value);
+        this.tasksService.putTask(this.task).subscribe (
+          () => {
+            template.hide();
+            this.getTasks();
+          }, error => {
+            console.log(error);
+          }
+        );
+      }
+    }
+  }
+
   getTasks() {
     this.tasksService.getAllTasks().subscribe(
       (_tasks: Tasks[]) => {
       this.tasks = _tasks;
+      this.filteredTasks = this.tasks;
     }, error => {
       console.log(error);
     });
+  }
+
+  confirmDelete(template: any) {
+    this.tasksService.deleteTask(this.task.id).subscribe(
+      () => {
+        template.hide();
+        this.getTasks();
+      }, error => {
+        console.log(error);
+      }
+    );
+  }
+
+  deleteTask(task: Tasks, template: any) {
+    this.openModal(template);
+    this.task = task;
+    this.bodyDeleteTask = `Are you sure to delete the task: ${task.title}, Code: ${task.id} ?`;
   }
 }

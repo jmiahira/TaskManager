@@ -107,14 +107,13 @@ namespace TaskList.WebAPI.Controllers
             return BadRequest();
         }
 
-        [HttpPut]
+        [HttpPut("{taskId}")]
         public async Task<IActionResult> Put(int taskId, Tasks model)
         {
             try
             {
                 var task = await _repository.GetTaskAsyncById(taskId, false);
                 if (task == null) return NotFound();
-
 
                 _repository.Update(model);
                 if (await(_repository.SaveChangesAsync())){
@@ -128,7 +127,7 @@ namespace TaskList.WebAPI.Controllers
             return BadRequest();
         }
 
-        [HttpDelete]
+        [HttpDelete("{taskId}")]
         public async Task<IActionResult> Delete(int taskId)
         {
             try
