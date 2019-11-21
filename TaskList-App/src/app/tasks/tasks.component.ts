@@ -4,6 +4,7 @@ import { Tasks } from '../_models/Tasks';
 import { BsModalService } from 'ngx-bootstrap';
 import { FormGroup, Validators, FormBuilder } from '@angular/forms';
 import { defineLocale, BsLocaleService, ptBrLocale } from 'ngx-bootstrap';
+import { ToastrService } from 'ngx-toastr';
 
 defineLocale('pt-br', ptBrLocale);
 
@@ -14,7 +15,7 @@ defineLocale('pt-br', ptBrLocale);
 })
 
 export class TasksComponent implements OnInit {
-  titulo = 'Task Lists';
+  titulo = 'My Tasks';
   tasks: Tasks[];
   task: Tasks;
   filteredTasks: Tasks[];
@@ -28,6 +29,7 @@ export class TasksComponent implements OnInit {
     , private modalService: BsModalService
     , private fb: FormBuilder
     , private localeService: BsLocaleService
+    , private toastr: ToastrService
   ) {
     this.localeService.use('pt-br');
   }
@@ -90,7 +92,9 @@ export class TasksComponent implements OnInit {
             console.log(newTask);
             template.hide();
             this.getTasks();
+            this.toastr.success('Task inserted successful');
           }, error => {
+            this.toastr.success(`Error during insert operation: ${error}`);
             console.log(error);
           }
         );
@@ -100,7 +104,9 @@ export class TasksComponent implements OnInit {
           () => {
             template.hide();
             this.getTasks();
+            this.toastr.success('Task edited successful');
           }, error => {
+            this.toastr.success(`Error during update operation: ${error}`);
             console.log(error);
           }
         );
@@ -123,7 +129,9 @@ export class TasksComponent implements OnInit {
       () => {
         template.hide();
         this.getTasks();
+        this.toastr.success('Deleted successful');
       }, error => {
+        this.toastr.error(`Error during delete operation: ${error}`);
         console.log(error);
       }
     );

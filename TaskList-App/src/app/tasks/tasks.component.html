@@ -1,3 +1,4 @@
+<app-title [title]="titulo"></app-title>
 <div class="d-flex">
     <div class="form-inline mr-auto">
         <div class="form-group mb-2">
@@ -31,7 +32,7 @@
             <td>{{task.id}}</td>
             <td>{{task.title}}</td>
             <td>{{task.description}}</td>
-            <td>{{task.creationDate | DateTimeFormatPipe}}</td>
+            <td>{{task.creationDate}}</td>
             <td>{{task.status}}</td>
             <td>{{task.userId}}</td>
             <td>{{task.priority}}</td>
