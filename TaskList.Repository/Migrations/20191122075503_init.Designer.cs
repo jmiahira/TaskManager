@@ -10,7 +10,7 @@ using TaskList.Repository;
 namespace TaskList.Repository.Migrations
 {
     [DbContext(typeof(TaskListContext))]
-    [Migration("20191120233500_init")]
+    [Migration("20191122075503_init")]
     partial class init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
