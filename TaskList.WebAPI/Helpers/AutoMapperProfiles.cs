@@ -1,5 +1,6 @@
 using AutoMapper;
 using TaskList.Domain;
+using TaskList.Domain.Identity;
 using TaskList.WebAPI.DTO;
 
 namespace TaskList.WebAPI.Helpers
@@ -10,6 +11,8 @@ namespace TaskList.WebAPI.Helpers
         {
             CreateMap<Tasks, TasksDTO>().ReverseMap();
             CreateMap<TaskRemarks, TaskRemarksDTO>().ReverseMap();
+            CreateMap<User, UserDTO>().ReverseMap();
+            CreateMap<User, UserLoginDTO>().ReverseMap();
         }
     }
 }
